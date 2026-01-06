@@ -1,0 +1,5 @@
+C:\Users\LLC LEADER\OneDrive\Рабочий стол\WebApiDotnet\Exam_06_01_2025\Infastructure\obj\Debug\net9.0\Infastructure.csproj.AssemblyReference.cache
+C:\Users\LLC LEADER\OneDrive\Рабочий стол\WebApiDotnet\Exam_06_01_2025\Infastructure\obj\Debug\net9.0\Infastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\LLC LEADER\OneDrive\Рабочий стол\WebApiDotnet\Exam_06_01_2025\Infastructure\obj\Debug\net9.0\Infastructure.AssemblyInfoInputs.cache
+C:\Users\LLC LEADER\OneDrive\Рабочий стол\WebApiDotnet\Exam_06_01_2025\Infastructure\obj\Debug\net9.0\Infastructure.AssemblyInfo.cs
+C:\Users\LLC LEADER\OneDrive\Рабочий стол\WebApiDotnet\Exam_06_01_2025\Infastructure\obj\Debug\net9.0\Infastructure.csproj.CoreCompileInputs.cache
