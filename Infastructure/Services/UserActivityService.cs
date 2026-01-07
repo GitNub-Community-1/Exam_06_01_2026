@@ -3,24 +3,37 @@ using AutoMapper;
 using Infastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using WebAPIWithJWTAndIdentity.Response;
 
-public class UserActivityServicepublic(ApplicationDbContext context, IMapper mapper, IMemoryCache memoryCache) : IUserActivityService
+public class UserActivityServicepublic(ApplicationDbContext context, IMapper mapper, IMemoryCache memoryCache, ILogger _logger) : IUserActivityService
 {
-    public async Task<Response<UserActivityDto>> AddUserActivityAsync(ActivityTypeCreatDto listing)
+    public async Task<Response<UserActivityDto>> AddUserActivityAsync(UserActivityCreatDto listing)
     {
+
+
          var userActivity = mapper.Map<UserActivity>(listing);
 
         context.UserActivities.Add(userActivity);
         await context.SaveChangesAsync();
 
         var result = mapper.Map<UserActivityDto>(userActivity);
+        _logger.LogInformation("Activity: Added Activity {@Activity}", new 
+        {
+            Id = result.Id,
+            UserId = result.UserId,
+            Description  = result.Description,
+            CreadAt = result.CreadAt,
+            ActivityId = result.ActivityId,
+            Time = DateTime.UtcNow
+        }
+        );
         memoryCache.Remove("userActivity_list");
 
         return new Response<UserActivityDto>(HttpStatusCode.Created, "User Activity created successfully!", result);
     }
 
-    public async Task<Response<string>> DeleteUserActivityAsync(int id)
+    public async Task<Response<string>> DeleteUserActivityAsync(int id,int currentUserId)
     {
           var userActivity = await context.UserActivities.FindAsync(id);
         if (userActivity == null)
@@ -28,14 +41,21 @@ public class UserActivityServicepublic(ApplicationDbContext context, IMapper map
 
         context.UserActivities.Remove(userActivity);
         await context.SaveChangesAsync();
-
+        _logger.LogInformation("Activity: Deleted Activity {@Activity}", new 
+        {
+            Id = currentUserId,
+            Message = "Deleting Activity",
+            DeletedId = id,
+            Time = DateTime.UtcNow
+        }
+        );
         memoryCache.Remove($"userActivity_{id}");
         memoryCache.Remove("userActivity_list");
 
         return new Response<string>(HttpStatusCode.OK, "User Activity deleted successfully!");
     }
 
-    public async Task<Response<List<UserActivityDto>>> GetUserActivitiesAsync(UserActivityFIlter filter)
+    public async Task<Response<List<UserActivityDto>>> GetUserActivitiesAsync(UserActivityFIlter filter, int currentUserId)
     {
          const string cacheKey = "userActivity_list";
 
@@ -59,7 +79,13 @@ public class UserActivityServicepublic(ApplicationDbContext context, IMapper map
 
         var userActivities = await query.ToListAsync();
         var result = mapper.Map<List<UserActivityDto>>(userActivities);
-
+        _logger.LogInformation("Activity: Geting Activity {@Activity}", new 
+        {
+            RequestUserId = currentUserId,
+            Count = result.Count,
+            Time = DateTime.UtcNow
+        }
+        );
         var response = new Response<List<UserActivityDto>>
         {
             StatusCode = (int)HttpStatusCode.OK,
@@ -74,9 +100,9 @@ public class UserActivityServicepublic(ApplicationDbContext context, IMapper map
         return response;
     }
 
-    public async Task<Response<UserActivityDto>> GetUserActivityByIdAsync(int id)
+    public async Task<Response<UserActivityDto>> GetUserActivityByIdAsync(int id, int currentUserId)
     {
-        string cacheKey = $"userActivities_{id}";
+        string cacheKey = $"userActivity_{id}";
 
         if (memoryCache.TryGetValue(cacheKey, out Response<UserActivityDto>? cachedResponse))
         {
@@ -88,6 +114,13 @@ public class UserActivityServicepublic(ApplicationDbContext context, IMapper map
             return new Response<UserActivityDto>(HttpStatusCode.NotFound, "User Activity not found");
 
         var result = mapper.Map<UserActivityDto>(userActivities);
+        _logger.LogInformation("Activity: Geting By ID Activity {@Activity}", new 
+        {
+            RequestUserId = currentUserId,
+            Data = result,
+            Time = DateTime.UtcNow
+        }
+        );
         var response = new Response<UserActivityDto>(HttpStatusCode.OK, "User Activity retrieved successfully!", result);
 
         var cacheEntryOptions = new MemoryCacheEntryOptions()
@@ -97,7 +130,7 @@ public class UserActivityServicepublic(ApplicationDbContext context, IMapper map
         return response;
     }
 
-    public async Task<Response<UserActivityDto>> UpdateUserActivityAsync(UserActivityDto listing)
+    public async Task<Response<UserActivityDto>> UpdateUserActivityAsync(UserActivityDto listing, int currentUserId)
     {
         var check = await context.UserActivities.FindAsync(listing.Id);
         if (check == null)
@@ -112,9 +145,15 @@ public class UserActivityServicepublic(ApplicationDbContext context, IMapper map
         await context.SaveChangesAsync();
 
         var result = mapper.Map<UserActivityDto>(check);
-
-        memoryCache.Remove($"userActivities_{listing.Id}");
-        memoryCache.Remove("userActivities_list");
+        _logger.LogInformation("Activity: Update Activity {@Activity}", new 
+        {
+            RequestUserId = currentUserId,
+            Data = result,
+            Time = DateTime.UtcNow
+        }
+        );
+        memoryCache.Remove($"userActivity_{listing.Id}");
+        memoryCache.Remove("userActivity_list");
 
         return new Response<UserActivityDto>(HttpStatusCode.OK, "User Activity updated successfully!", result);
     }
