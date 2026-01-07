@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Quartz;
 using Serilog;
 using WebAPIWithJWTAndIdentity.MiddleWare;
 
@@ -67,13 +68,25 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+    var jobKey = new JobKey("UserActivityAnalysisJob");
+    q.AddJob<UserActivityAnalysisJob>(opts => opts.WithIdentity(jobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("UserActivityAnalysisJob-trigger")
+        .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever()));
+});
+
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<Seeder>();
 
-// builder.Services.AddScoped<IListingService, ListingService>();
-// builder.Services.AddScoped<IMainCategoryService, MainCategoryService>();
-// builder.Services.AddScoped<ISubcategoryService, SubcategoryService>();
-// builder.Services.AddScoped<IReportLogService, ReportLogService>();
+builder.Services.AddScoped<IUserActivityService,UserActivityService>();
+builder.Services.AddScoped<IActivityTypeService,ActivityTypeService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddAutoMapper(typeof(MapperProfile));
@@ -137,7 +150,6 @@ if (!app.Environment.IsEnvironment("EfMigration"))
         var seeder = services.GetRequiredService<Seeder>();
         await seeder.SeedRole();
         await seeder.SeedUser();
-        await seeder.SeedRealEstateCategories();
     }
     catch (Exception ex)
     {

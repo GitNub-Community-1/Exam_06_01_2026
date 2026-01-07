@@ -1,6 +1,5 @@
 using Infastructure.Data;
 using Microsoft.AspNetCore.Identity;
-using Models;
 
 namespace Infrastructure.Seed;
 
@@ -49,7 +48,8 @@ public class Seeder
             UserName = "admin",
             PhoneNumber = "13456777",
             Email = "admin@gmail.com",
-            Name = "Admin First"
+            FirstName = "Admin",
+            LastName = "First"
         };
 
         var result = await _userManager.CreateAsync(identity, "hello123");
@@ -57,40 +57,6 @@ public class Seeder
         return result.Succeeded;
     }
     
-    public async Task<bool> SeedRealEstateCategories()
-    {
-        const string mainName = "Недвижимость";
-        if (_context.MainCategories.Any(m => m.Name == mainName)) return false;
-
-        var main = new MainCategory
-        {
-            Name = mainName,
-            Subcategories = new List<Subcategory>()
-        };
-
-        var subs = new List<Subcategory>
-        {
-            new Subcategory { Title = "Аренда комнат", Section = RealEstateSection.Rent, Category = RealEstateCategory.Room },
-            new Subcategory { Title = "Аренда квартир", Section = RealEstateSection.Rent, Category = RealEstateCategory.Apartment },
-            new Subcategory { Title = "Посуточная аренда квартир, домов", Section = RealEstateSection.DailyRent, Category = RealEstateCategory.Apartment },
-            new Subcategory { Title = "Аренда домов (хавли)", Section = RealEstateSection.Rent, Category = RealEstateCategory.HouseOrDacha },
-            new Subcategory { Title = "Аренда дач", Section = RealEstateSection.Rent, Category = RealEstateCategory.HouseOrDacha },
-            new Subcategory { Title = "Аренда офисов и помещений", Section = RealEstateSection.Rent, Category = RealEstateCategory.OfficeOrPremises },
-            new Subcategory { Title = "Продажа квартир", Section = RealEstateSection.Sale, Category = RealEstateCategory.Apartment },
-            new Subcategory { Title = "Продажа домов (хавли) и дач", Section = RealEstateSection.Sale, Category = RealEstateCategory.HouseOrDacha },
-            new Subcategory { Title = "Продажа, аренда построек с земельным участком", Section = RealEstateSection.Sale, Category = RealEstateCategory.PlotWithBuilding },
-            new Subcategory { Title = "Продажа, аренда гаражей и стоянок", Section = RealEstateSection.Sale, Category = RealEstateCategory.GarageOrParking },
-            new Subcategory { Title = "Продажа офисов и помещений", Section = RealEstateSection.Sale, Category = RealEstateCategory.OfficeOrPremises },
-            new Subcategory { Title = "Продажа отдельно стоящих зданий", Section = RealEstateSection.Sale, Category = RealEstateCategory.StandaloneBuilding },
-            new Subcategory { Title = "Продажа, аренда вагончиков, бытовок, вагон-домов", Section = RealEstateSection.Sale, Category = RealEstateCategory.CabinOrContainer }
-        };
-
-        foreach (var s in subs) main.Subcategories.Add(s);
-
-        _context.MainCategories.Add(main);
-        await _context.SaveChangesAsync();
-        return true;
-    }
     
    
 

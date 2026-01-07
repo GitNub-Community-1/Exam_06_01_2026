@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using WebAPIWithJWTAndIdentity.Response;
 
-public class UserActivityServicepublic(ApplicationDbContext context, IMapper mapper, IMemoryCache memoryCache, ILogger _logger) : IUserActivityService
+public class UserActivityService(ApplicationDbContext context, IMapper mapper, IMemoryCache memoryCache, ILogger<UserActivityService> _logger) : IUserActivityService
 {
     public async Task<Response<UserActivityDto>> AddUserActivityAsync(UserActivityCreatDto listing)
     {
